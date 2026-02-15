@@ -42,7 +42,7 @@ build:
 # show-ports:
 #     uvx --from pyserial pyserial-ports  
 
-# serial-from-host port="/dev/cu.usbmodem101" baud="115200":
+# serial-from-host port="/dev/cu.usbmodem101" baud="921600":
 #     # python3 -m serial.tools.miniterm "{{port}}" 115200
 #     uvx --from pyserial pyserial-miniterm - "{{baud}}"
 #     # python -m esptool --port " " --chip auto --baud 921600 --before default_reset --after hard_reset write_flash -u --flash_size detect 0x0 workspace/apps/01_blink/build/zephyr/zephyr.bin
