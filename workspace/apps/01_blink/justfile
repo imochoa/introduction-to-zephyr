@@ -1,0 +1,11 @@
+set positional-arguments := true
+set shell := ["bash", "-euco", "pipefail"]
+
+JUST_DIR := justfile_directory()
+
+[private]
+_help:
+    @just --list --list-submodules
+
+build:
+    "${VIRTUAL_ENV}/bin/python" -m west build -p always -b esp32s3_devkitc/esp32s3/procpu -- -DDTC_OVERLAY_FILE=boards/esp32s3_devkitc.overlay
