@@ -2,7 +2,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/led_strip.h>
-#include <zephyr/driversa/spi.h>
+#include <zephyr/drivers/spi.h>
 
 // Settings
 static const int32_t sleep_time_ms = 1000;
