@@ -1,0 +1,45 @@
+#include <zephyr/dt-bindings/mipi_dbi/mipi_dbi.h>
+
+/ {
+	chosen {
+		zephyr,display = &uc8253;
+	};
+
+	mipi_dbi_epd {
+		compatible = "zephyr,mipi-dbi-spi";
+		spi-dev = <&spi2>;
+		dc-gpios = <&gpio0 9 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio1 14 GPIO_ACTIVE_LOW>;   /* GPIO46 */
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		uc8253: uc8253@0 {
+			compatible = "ultrachip,uc8253";
+			reg = <0>;
+			mipi-max-frequency = <1000000>;
+			width = <240>;
+			height = <416>;
+			busy-gpios = <&gpio0 3 GPIO_ACTIVE_LOW>;
+			psr = [1F 0D];
+		};
+	};
+};
+
+&spi2 {
+	pinctrl-0 = <&spi2_epaper_pins>;
+	pinctrl-names = "default";
+	cs-gpios = <&gpio0 10 GPIO_ACTIVE_LOW>;
+	status = "okay";
+};
+
+&pinctrl {
+	spi2_epaper_pins: spi2_epaper_pins {
+		group1 {
+			pinmux = <SPIM2_SCLK_GPIO12>;
+		};
+		group2 {
+			pinmux = <SPIM2_MOSI_GPIO11>;
+			output-low;
+		};
+	};
+};
