@@ -1,10 +1,17 @@
 #include <zephyr/dt-bindings/mipi_dbi/mipi_dbi.h>
 
+// SDA / MOSI GPIO 11
+// SCL / SCK GPIO 12
+// CS GPIO 10
+// D/C GPIO 9
+// RES GPIO 46 (GPIO1_14)
+// BUSY GPIO 3
+
 / {
 	chosen {
 		zephyr,display = &uc8253;
 	};
-
+	
 	mipi_dbi_epd {
 		compatible = "zephyr,mipi-dbi-spi";
 		spi-dev = <&spi2>;
@@ -12,7 +19,7 @@
 		reset-gpios = <&gpio1 14 GPIO_ACTIVE_LOW>;   /* GPIO46 */
 		#address-cells = <1>;
 		#size-cells = <0>;
-
+		
 		uc8253: uc8253@0 {
 			compatible = "ultrachip,uc8253";
 			reg = <0>;
