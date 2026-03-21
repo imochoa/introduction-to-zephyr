@@ -12,8 +12,11 @@
 		zephyr,display = &uc8253;
 	};
 	
+	// mini-dbi-device.yaml (included by mipi-dbi-spi-device.yaml)
+	// base.yaml, power.yaml (included by mipi-dbi-device.yaml)
 	mipi_dbi_epd {
 		compatible = "zephyr,mipi-dbi-spi";
+		// /opt/toolchains/zephyr/dts/bindings/mipi-dbi/zephyr,mipi-dbi-spi.yaml
 		spi-dev = <&spi2>;
 		dc-gpios = <&gpio0 9 GPIO_ACTIVE_HIGH>;
 		reset-gpios = <&gpio1 14 GPIO_ACTIVE_LOW>;   /* GPIO46 */
@@ -22,12 +25,16 @@
 		
 		uc8253: uc8253@0 {
 			compatible = "ultrachip,uc8253";
+			// /workspaces/zephyr-devcontainer/apps/10_demo_epaper/dts/bindings/display/ultrachip,uc8253.yaml
 			reg = <0>;
 			mipi-max-frequency = <1000000>;
-			width = <240>;
-			height = <416>;
 			busy-gpios = <&gpio0 3 GPIO_ACTIVE_LOW>;
 			psr = [1F 0D];
+			// 
+			// display-controller.yaml
+			// (in px)
+			width = <240>;
+			height = <416>;
 		};
 	};
 };

@@ -17,6 +17,17 @@ properties:
       BUSY pin. LOW while the controller is busy, HIGH when ready.
       Configure as GPIO_ACTIVE_LOW so gpio_pin_get_dt returns 1 when busy.
 
+    # From ultrachip,uc81xx-common.yaml
+    # description: BUSY pin.
+
+    #   The BUSY pin of UC81xx is active low.
+    #   If connected directly the MCU pin should be configured
+    #   as active low.
+
+  # softstart:
+  #   type: uint8-array
+  #   description: Booster Soft Start (BTST) values
+
   psr:
     type: uint8-array
     default: [0x1F, 0x0D]
@@ -26,3 +37,71 @@ properties:
       (from GxEPD2_370_GDEY037T03 reference driver).
       Byte 0 bit 4 (RSEL): 1=BW only mode.
       Byte 1: VCOM and data interval settings.
+
+# child-binding:
+#   description: |
+#     Child nodes describe refresh profiles. Each refresh profile
+#     specifies a set of voltages used to drive the refresh
+#     cycle. Refresh nodes are optional and are used to override
+#     defaults loaded from the controllers OTP memory.
+
+#     The partial refresh profile is used when performing a partial
+#     refresh (writes while blanking is off). Since the controller
+#     always supports partial updates, the driver uses the full refresh
+#     profile and scans the partial window corresponding to the write if
+#     no partial profile has been provided. An empty profile can be used
+#     to use the reset values from OTP instead of the values specified
+#     in the full profile.
+
+#     The driver typically looks for the following child nodes:
+
+#       - 'full' - Normal / full refresh.
+#       - 'partial' - Partial refresh, defaults to the values in the
+#         full profile if not present.
+
+#   properties:
+#     pwr:
+#       type: uint8-array
+#       description: Power Setting (PWR) values
+
+#     cdi:
+#       type: int
+#       description: |
+#         VCOM and data interval value. This value is optional but must
+#         be provided to enable border refresh control.
+
+#     tcon:
+#       type: int
+#       description: TCON setting value
+
+#     pll:
+#       type: int
+#       description: PLL / frame rate control
+
+#     vdcs:
+#       type: int
+#       description: VCOM DC settings
+
+#     lutc:
+#       type: uint8-array
+#       description: VCOM LUT
+
+#     lutww:
+#       type: uint8-array
+#       description: White-to-white LUT
+
+#     lutkw:
+#       type: uint8-array
+#       description: Black-to-white LUT
+
+#     lutwk:
+#       type: uint8-array
+#       description: White-to-black LUT
+
+#     lutkk:
+#       type: uint8-array
+#       description: White-to-black LUT
+
+#     lutbd:
+#       type: uint8-array
+#       description: Border LUT
