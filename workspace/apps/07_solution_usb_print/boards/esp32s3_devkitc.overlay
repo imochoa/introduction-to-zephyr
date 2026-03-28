@@ -1,21 +1,26 @@
 / {
-    aliases {
-        my-led = &led0;
-    };
-
-    chosen {
-        zephyr,console = &usb_serial;
-        zephyr,shell-uart = &usb_serial;
-    };
-
-    leds {
-        compatible = "gpio-leds";
-        led0: d13 {
-            gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
-        };
-    };
+	aliases {
+		my-led = &led0;
+	};
+	
+	chosen {
+		// Print to COM (default)
+		// zephyr,console = &uart0;
+		// zephyr,shell-uart = &uart0;
+		// Print to USB (debugging)		
+		zephyr,console = &usb_serial;
+		zephyr,shell-uart = &usb_serial;
+	};
+	
+	leds {
+		compatible = "gpio-leds";
+		led0: d13 {
+			gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
+		};
+	};
 };
 
+// Print to USB (debugging)
 &usb_serial {
-    status = "okay";
+	status = "okay";
 };
