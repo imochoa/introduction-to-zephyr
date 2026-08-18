@@ -1,43 +1,35 @@
 #include <zephyr/dt-bindings/mipi_dbi/mipi_dbi.h>
 
-// SDA / MOSI GPIO 11
-// SCL / SCK GPIO 12
-// CS GPIO 10
-// D/C GPIO 9
-// RES GPIO 46 (GPIO1_14)
-// BUSY GPIO 3
+/*
+ * WeAct Studio 3.7" GDEY037T03 / UC8253
+ *
+ * MOSI GPIO11, SCLK GPIO12, CS GPIO10, D/C GPIO9,
+ * RESET GPIO46 (gpio1 offset 14), BUSY GPIO3.
+ */
 
 / {
 	chosen {
-		zephyr,display = &mydisplay;
-		// zephyr,concat-buf-size
-		// for streamling larget amounts of data. If you need more, look into I2C_BITRATE_FAST
+		zephyr,display = &epaper;
+		zephyr,console = &usb_serial;
+		zephyr,shell-uart = &usb_serial;
 	};
-	
-	
-	// mini-dbi-device.yaml (included by mipi-dbi-spi-device.yaml)
-	// base.yaml, power.yaml (included by mipi-dbi-device.yaml)
-	mipi_dbi_epd {
+
+	mipi_dbi_epd: mipi_dbi_epd {
 		compatible = "zephyr,mipi-dbi-spi";
-		// /opt/toolchains/zephyr/dts/bindings/mipi-dbi/zephyr,mipi-dbi-spi.yaml
 		spi-dev = <&spi2>;
 		dc-gpios = <&gpio0 9 GPIO_ACTIVE_HIGH>;
-		reset-gpios = <&gpio1 14 GPIO_ACTIVE_LOW>;   /* GPIO46 */
+		reset-gpios = <&gpio1 14 GPIO_ACTIVE_LOW>; /* GPIO46 */
+		write-only;
 		#address-cells = <1>;
 		#size-cells = <0>;
-		
-		mydisplay: uc8253@0 {
-			// 			compatible = "ultrachip,uc8175";
-			// compatible = "ultrachip,uc8176";
-			compatible = "ultrachip,uc8179";
-			// /workspaces/zephyr-devcontainer/apps/10_demo_epaper/dts/bindings/display/ultrachip,uc8253.yaml
+
+		epaper: uc8253@0 {
+			compatible = "ultrachip,uc8253";
 			reg = <0>;
 			mipi-max-frequency = <1000000>;
+			mipi-hold-cs;
 			busy-gpios = <&gpio0 3 GPIO_ACTIVE_LOW>;
-			// psr = [1F 0D];
-			// 
-			// display-controller.yaml
-			// (in px)
+			psr = [1f 0d];
 			width = <240>;
 			height = <416>;
 		};
@@ -61,4 +53,8 @@
 			output-low;
 		};
 	};
+};
+
+&usb_serial {
+	status = "okay";
 };
