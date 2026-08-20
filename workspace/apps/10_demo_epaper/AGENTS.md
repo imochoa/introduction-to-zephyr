@@ -1,7 +1,7 @@
 # E-Paper Demo — Agent Context
 
-**Last updated:** 2026-08-18
-**Status:** Working on physical hardware; displays LVGL text.
+**Last updated:** 2026-08-20
+**Status:** Working on physical hardware, including monochrome LVGL screens and pre-rasterized 90-degree text.
 
 ## Purpose
 
@@ -39,19 +39,25 @@ input, not a suitable output for this module.
 ```text
 10_demo_epaper/
 ├── CMakeLists.txt
+├── Kconfig                         # demo selection and cycle interval
 ├── prj.conf
 ├── boards/
-│   ├── esp32s3_devkitc.overlay       # canonical UC8253 wiring and USB console
-│   ├── esp32s3_devkitc-8179.overlay  # old built-in-driver experiment
+│   ├── esp32s3_devkitc_procpu.overlay # canonical UC8253 wiring and USB console
+│   ├── esp32s3_devkitc-8179.overlay   # old built-in-driver experiment
 │   └── usb_print.overlay             # reusable USB-console fragment
 ├── drivers/display/uc8253.c
 ├── dts/bindings/display/ultrachip,uc8253.yaml
-└── src/main.c
+└── src/
+    ├── main.c                      # selection, refresh, and cycle loop
+    ├── demos.c                     # LVGL demo screens
+    └── demos.h
 ```
 
-Do not select the overlay in `CMakeLists.txt`. Zephyr automatically discovers
-`boards/esp32s3_devkitc.overlay`, and command-line `DTC_OVERLAY_FILE` overrides
-remain possible. The canonical overlay must use `compatible =
+Do not select the overlay in `CMakeLists.txt`. For the qualified
+`esp32s3_devkitc/esp32s3/procpu` target, Zephyr automatically discovers
+`boards/esp32s3_devkitc_procpu.overlay`; the shorter board-only filename is not
+selected. Command-line `DTC_OVERLAY_FILE` overrides remain possible. The
+canonical overlay must use `compatible =
 "ultrachip,uc8253"`; the UC8179 overlay is retained only as an experiment.
 
 ## Alignment with Zephyr's UC81xx driver
@@ -129,25 +135,49 @@ Use 1-bpp tiled flushing:
 
 ```config
 CONFIG_LVGL=y
+CONFIG_LV_USE_IMG=y
 CONFIG_LV_Z_BITS_PER_PIXEL=1
 CONFIG_LV_COLOR_DEPTH_1=y
-CONFIG_LV_Z_VDB_SIZE=100
+CONFIG_LV_Z_VDB_SIZE=10
 # CONFIG_LV_Z_FULL_REFRESH is not set
 ```
 
-Do **not** enable `CONFIG_LV_Z_FULL_REFRESH` with this Zephyr/LVGL version.
-Zephyr's `lvgl_flush_cb_mono()` calls `display_blanking_on()` on the first
-non-final tile and `display_blanking_off()` after the final tile. A single full
-flush is already marked final, so it is not bracketed and the deferred UC8253
-frame would not refresh naturally.
+Do **not** enable `CONFIG_LV_Z_FULL_REFRESH` or set `CONFIG_LV_Z_VDB_SIZE=100`
+with this Zephyr/LVGL version. Zephyr's `lvgl_flush_cb_mono()` calls
+`display_blanking_on()` on the first non-final tile and
+`display_blanking_off()` after the final tile. A single full-screen flush is
+already marked final, so it is not bracketed and the deferred UC8253 frame does
+not refresh. A 10% render buffer produces about ten tiles per frame.
 
 Do not manually call `display_blanking_off()` from the application. With tiled
 flushing, the LVGL adapter owns blanking and manual calls risk duplicate panel
 refreshes. Set an explicit white opaque background and black foreground because
 default theme colors are not reliable on a 1-bpp display.
 
-The demo invokes `lv_task_handler()` once because its screen is static. A dynamic
-application must call the LVGL handler periodically from its normal UI loop.
+### Demo selection and rotated text
+
+`Kconfig` provides static hello, status, pattern, and sideways modes plus a timed
+cycle mode. `prj.conf` currently selects the static sideways screen for hardware
+verification. Keep `src/demos.c` synchronized with the simulator counterpart at
+`iot/lvgl-devenv/apps/epaper/demos.c` when changing shared screen layouts.
+
+Do not use `lv_obj_set_style_transform_angle()` for text that must work on this
+monochrome target. LVGL 8's transformed layers behave differently at
+`LV_COLOR_DEPTH=1`: the transformed rectangle can render while a child label or
+its foreground color disappears. The browser simulator uses RGB565 internally
+and does not reproduce that failure.
+
+The sideways screen therefore reads Montserrat glyph bitmaps and rasterizes them
+directly into persistent `LV_IMG_CF_INDEXED_1BIT` buffers in their final rotated
+orientation. It uses one black image with white `SIDEWAYS` text and one white
+image with black `NO BOX` text. This requires `CONFIG_LV_USE_IMG=y`. The buffers
+and `lv_img_dsc_t` descriptors must remain alive for as long as their LVGL image
+objects exist; do not make them function-local.
+
+The demo calls `lv_refr_now(NULL)` after constructing each screen. This forces
+LVGL to render all tiles immediately; the final tile blocks until the e-paper
+refresh finishes. The cycle mode then sleeps before constructing the next
+screen.
 
 ## Build and inspect
 

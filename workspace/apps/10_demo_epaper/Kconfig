@@ -1,0 +1,32 @@
+menu "E-paper LVGL demo"
+
+choice EPAPER_DEMO_MODE
+	prompt "Demo shown after boot"
+	default EPAPER_DEMO_CYCLE
+
+config EPAPER_DEMO_CYCLE
+	bool "Cycle through all demos"
+
+config EPAPER_DEMO_HELLO
+	bool "Hello card"
+
+config EPAPER_DEMO_STATUS
+	bool "Status panel"
+
+config EPAPER_DEMO_PATTERN
+	bool "Monochrome test pattern"
+
+config EPAPER_DEMO_SIDEWAYS
+	bool "Sideways text"
+
+endchoice
+
+config EPAPER_DEMO_INTERVAL_SECONDS
+	int "Seconds between demos"
+	depends on EPAPER_DEMO_CYCLE
+	range 5 3600
+	default 10
+
+endmenu
+
+source "Kconfig.zephyr"

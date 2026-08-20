@@ -2,11 +2,16 @@ cmake_minimum_required(VERSION 3.20.0)
 
 list(APPEND DTS_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
-# Zephyr automatically selects boards/esp32s3_devkitc.overlay for this board.
-# Experimental overlays remain available via DTC_OVERLAY_FILE when needed.
+# Zephyr automatically selects boards/esp32s3_devkitc_procpu.overlay for the
+# esp32s3_devkitc/esp32s3/procpu board target. Experimental overlays remain
+# available via DTC_OVERLAY_FILE when needed.
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 project(demo_epaper)
 
-target_sources(app PRIVATE src/main.c drivers/display/uc8253.c)
+target_sources(app PRIVATE
+  src/main.c
+  src/demos.c
+  drivers/display/uc8253.c
+)
